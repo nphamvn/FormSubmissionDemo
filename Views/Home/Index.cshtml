@@ -1,0 +1,111 @@
+﻿@model checkboxlist.Models.HomeIndexModel
+@{
+    ViewData["Title"] = "Home Page";
+    var checkBoxListItems = ViewBag._CheckBoxListItems as List<SelectListItem>;
+    var profileSelectListItems = ViewBag._ProfileSelectListItems as List<ProfileItem>;
+    var profiles = ViewBag._Profiles as List<ProfileItem>;
+    profiles ??= new List<ProfileItem>();
+    Model.ProfileIds ??= new();
+}
+<div class="text-center">
+    <h1 class="display-4">Submit List</h1>
+</div>
+<form method="post">
+    <h2>CheckBox List</h2>
+    <div class="row">
+        <div class="col">
+            <div>Input</div>
+            @for (int i = 0; i < Model.MonsterFeatureItems.Count; i++)
+            {
+                var selectListItem = checkBoxListItems.First(x => x.Value == Model.MonsterFeatureItems[i].Value);
+                <div>
+                    <input type="checkbox" asp-for="MonsterFeatureItems[i].Checked">
+                    <input type="hidden" asp-for="MonsterFeatureItems[i].Value" value="@selectListItem.Value">
+                    <label>@selectListItem.Text</label>
+                </div>
+            }
+        </div>
+        <div class="col">
+            <div>Checked Values</div>
+            @{
+                var checkedValues = Model.MonsterFeatureItems.Where(i => i.Checked).Select(i => i.Value);
+                <div>@string.Join(',',checkedValues)</div>
+            }
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div>Input</div>
+            @foreach (var item in profileSelectListItems)
+            {
+                <div>
+                    <input type="checkbox" value="@item.ProfileId" class="js-profile-checkbox">
+                    <label class="js-profile-name">@item.Name</label>
+                </div>
+            }
+            <button type="button" class="js-select-profile">Select</button>
+        </div>
+        <div class="col">
+            <div>Selected Profiles</div>
+            <div class="js-profile-list">
+                @for (int i = 0; i < Model.ProfileIds.Count; i++)
+                {
+                    <div class="js-profile-item">
+                        <div>@profiles.First(p => p.ProfileId == Model.ProfileIds[i]).Name</div>
+                        <input type="hidden" asp-for="ProfileIds[i]">
+                        <button type="button" class="js-remove-profile">x</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <hr>
+    <button type="submit">Submit</button>
+</form>
+<script>
+    let selectedProfiles = JSON.parse('@Json.Serialize(profiles?.Select(p => new { p.ProfileId, p.Name}))');
+    function addProfileItem(profile) {
+        const existingProfile = selectedProfiles.find(p => p.profileId === profile.profileId);
+        if (!existingProfile) {
+            selectedProfiles.push(profile);
+        }
+    }
+    function removeProfileItem(profileId) {
+        const index = selectedProfiles.findIndex(profile => profile.profileId === profileId);
+        if (index !== -1) {
+            selectedProfiles.splice(index, 1);
+        }
+    }
+    $('.js-profile-checkbox').change(function () {
+        const profileId = $(this).val();
+        const profileName = $(this).siblings('.js-profile-name').text();
+        console.log(profileId)
+        if ($(this).prop('checked')) {
+            addProfileItem({ profileId: profileId, name: profileName })
+        } else {
+            removeProfileItem(profileId);
+        }
+    });
+    $('.js-remove-profile').click(function () {
+        const id = parseInt($(this).closest('.js-profile-item').find('input[type=hidden]').val());
+        console.log(id)
+        removeProfileItem(id);
+        render();
+    })
+    $('.js-select-profile').click(function () {
+        render();
+    });
+    function render() {
+        const html = selectedProfiles.map((p, index) => `
+            <div class="js-profile-item">
+                <div>${p.name}</div>
+                <input type="hidden" name="ProfileIds[${index}]" value="${p.profileId}">
+                <button type="button" class="js-remove-profile">x</button>
+            </div>`).join('');
+        $('.js-profile-list').html(html)
+    }
+    $(function () {
+
+    });
+</script>

@@ -1,0 +1,10 @@
+@{
+    var profileSelectListItems = ViewBag._ProfileSelectListItems as List<ProfileItem>;
+}
+@foreach (var item in profileSelectListItems)
+{
+    <div>
+        <input type="checkbox" value="@item.ProfileId" class="js-profile-checkbox">
+        <label class="js-profile-name">@item.Name</label>
+    </div>
+}
