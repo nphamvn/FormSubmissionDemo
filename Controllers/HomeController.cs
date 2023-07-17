@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using checkboxlist.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SubmitCheckBoxListDemo.Models;
 
-namespace checkboxlist.Controllers;
+namespace SubmitCheckBoxListDemo.Controllers;
 
 public class HomeController : Controller
 {
@@ -14,101 +14,94 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    [HttpGet]
-    public IActionResult Index(string mode)
+    public IActionResult Index()
     {
-        HomeIndexModel model;
-        //get select list item from other resourse e.g database
-        var checkBoxListItems = GetCheckBoxListItems();
-        if (mode == "edit")
-        {
-            var savedMonsterFeatureItems = new List<MonsterFeatureItem>
-            {
-                new() { Value = "Horns"}
-            };
-            model = new HomeIndexModel()
-            {
-                MonsterFeatureItems = savedMonsterFeatureItems.Select(x => new MonsterFeatureItem
-                {
-                    Value = x.Value,
-                    Checked = true
-                }).ToList(),
-                ProfileIds = new() { 1 }
-            };
-        }
-        else
-        {
-            model = new HomeIndexModel
-            {
-                MonsterFeatureItems = MonsterFeatureItem.CreateListFromSelectListItems(checkBoxListItems),
-                ProfileIds = new()
-            };
-        }
-        //
-        ViewBag._ProfileSelectListItems = GetProfileSelectListItems();
-        //
-        ViewBag._CheckBoxListItems = checkBoxListItems;
-        return View(model);
+        return View();
     }
 
-    private List<ProfileItem> GetProfileSelectListItems()
+    [HttpGet("Create")]
+    public async Task<IActionResult> Create()
     {
-        return new(){
-            new() {ProfileId = 1, Name = "Nam"},
-            new() {ProfileId = 2, Name = "Yen Anh"}
+        var model = new SaveModel();
+        return await ViewResult(model);
+    }
+
+    [HttpGet("Edit/{Id:int}")]
+    public async Task<IActionResult> Edit(int Id)
+    {
+        var model = await GetSaveModel(Id);
+        return await ViewResult(model, Id);
+    }
+
+    [HttpPost("Create")]
+    public async Task<IActionResult> Create(SaveModel model)
+    {
+        await PreProcess(model);
+        await Validate(model, ModelState);
+        if (model.IsConfirmBack || !ModelState.IsValid)
+        {
+            model.FormMode = FormMode.Edit;
+            return await ViewResult(model);
+        }
+        if (model.FormMode == FormMode.Edit)
+        {
+            model.FormMode = FormMode.Confirm;
+            return await ViewResult(model);
+        }
+        await Save(model);
+        model.FormMode = FormMode.Finish;
+        return await ViewResult(model);
+    }
+
+    [HttpPost("Edit/{Id:int}")]
+    public async Task<IActionResult> Edit(int Id, SaveModel model)
+    {
+        await PreProcess(model, Id);
+        await Validate(model, ModelState, Id);
+        if (model.IsConfirmBack || !ModelState.IsValid)
+        {
+            model.FormMode = FormMode.Edit;
+            return await ViewResult(model, Id);
+        }
+        if (model.FormMode == FormMode.Edit)
+        {
+            model.FormMode = FormMode.Confirm;
+            return await ViewResult(model, Id);
+        }
+        await Save(model);
+        model.FormMode = FormMode.Finish;
+        return await ViewResult(model, Id);
+    }
+
+    private async Task PreProcess(SaveModel model, int? id = null)
+    {
+
+    }
+    private async Task Validate(SaveModel model, ModelStateDictionary modelState, int? id = null)
+    {
+
+    }
+    private async Task Save(SaveModel model)
+    {
+
+    }
+    private async Task<SaveModel> GetSaveModel(int id)
+    {
+        return new SaveModel
+        {
+
         };
     }
-
-    [HttpGet("ProfilesPartial")]
-    public IActionResult ProfilesPartial(int page)
+    private async Task<IActionResult> ViewResult(SaveModel model, int? id = null)
     {
-        ViewBag._ProfileSelectListItems = GetProfileSelectListItems();
-        return PartialView();
-    }
-
-    private List<ProfileItem> GetProfiles()
-    {
-        return new();
-    }
-
-    [HttpPost]
-    public IActionResult Index(HomeIndexModel model)
-    {
-        //get the checked values
-        var checkedValues = model.MonsterFeatureItems.Where(i => i.Checked).Select(i => i.Value);
-
-        //display the checked values for demo purpose
-        ViewBag._CheckBoxListItems = GetCheckBoxListItems();
-        ViewBag._Profiles = GetProfiles(model.ProfileIds);
-        ViewBag._ProfileSelectListItems = GetProfileSelectListItems();
-        return View(model);
-    }
-
-    private List<ProfileItem> GetProfiles(List<int> profileIds)
-    {
-        if (profileIds?.Any() ?? false)
-        {
-            var profiles = GetProfileSelectListItems();
-            return profileIds.Select(id => new ProfileItem()
-            {
-                ProfileId = id,
-                Name = profiles.First(p => p.ProfileId == id).Name
-            }).ToList();
-        }
-        return Enumerable.Empty<ProfileItem>().ToList();
+        ViewBag._Data = "ViewBagData";
+        ViewData["Action"] = id == null ? "Create" : "Edit";
+        return View("Views/Home/Save.cshtml", model);
     }
 
     public IActionResult Privacy()
     {
         return View();
-    }
-
-    private List<SelectListItem> GetCheckBoxListItems()
-    {
-        return new List<SelectListItem>() {
-                new () { Text = "Scales", Value="Scales"},
-                new () { Text = "Horns", Value="Horns"}
-            };
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

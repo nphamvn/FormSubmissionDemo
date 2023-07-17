@@ -1,0 +1,31 @@
+@model SubmitCheckBoxListDemo.Models.SaveModel
+@{
+    var action = ViewData["Action"];
+}
+<form method="post">
+    <input type="hidden" asp-for="FormMode" value="@Model.FormMode">
+    <h2>@action</h2>
+    <div asp-validation-summary="None" class="text-danger"></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <section>
+        @if (Model.FormMode == FormMode.Finish)
+        {
+            <p>Thank you</p>
+            <a class="btn btn-primary" href="/">Back to home</a>
+        }
+    </section>
+    <section>
+
+    </section>
+    <section>
+        @if (Model.FormMode == FormMode.Confirm)
+        {
+            <input type="submit" name="@Html.NameFor(m => m.ConfirmBack)" value="Edit">
+        }
+        @if (Model.FormMode == FormMode.Edit || Model.FormMode == FormMode.Confirm)
+        {
+            <button type="submit">@(Model.FormMode == FormMode.Edit ? "Confirm" : "Save")</button>
+        }
+    </section>
+</form>
