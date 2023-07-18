@@ -72,10 +72,39 @@ public class HomeController : Controller
         model.FormMode = FormMode.Finish;
         return await ViewResult(model, Id);
     }
+    [HttpGet("image")]
+    private async Task<IActionResult> Image(int? id = null, string? tempImageName = null)
+    {
+        if (id != null)
+        {
+            return new FileStreamResult(new FileStream(id.Value.ToString(), FileMode.Open), "image/*");
+        }
+        if (!string.IsNullOrEmpty(tempImageName))
+        {
+            return new FileStreamResult(new FileStream(tempImageName!, FileMode.Open), "image/*");
+        }
+        return null;
+    }
 
     private async Task PreProcess(SaveModel model, int? id = null)
     {
-
+        if (model.Image is ImageModel imageModel && imageModel.FormFile is IFormFile image)
+        {
+            model.Image.TempImageName = imageModel.FormFile.FileName;
+        }
+    }
+    private void BeforeRender(SaveModel model, int? id = null)
+    {
+        model.Image ??= new();
+        if (!string.IsNullOrEmpty(model.Image.TempImageName))
+        {
+            model.Image.Src = Url.Action(nameof(Image), new { tempImageName = model.Image.TempImageName });
+        }
+        else if (id != null)
+        {
+            model.Image.Src = Url.Action(nameof(Image), new { id = id.Value });
+        }
+        model.Image.Src ??= ImageModel.DefaultSrc;
     }
     private async Task Validate(SaveModel model, ModelStateDictionary modelState, int? id = null)
     {
@@ -96,6 +125,7 @@ public class HomeController : Controller
     {
         ViewBag._Data = "ViewBagData";
         ViewData["Action"] = id == null ? "Create" : "Edit";
+        BeforeRender(model);
         return View("Views/Home/Save.cshtml", model);
     }
 

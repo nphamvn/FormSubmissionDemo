@@ -2,7 +2,7 @@
 @{
     var action = ViewData["Action"];
 }
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="FormMode" value="@Model.FormMode">
     <h2>@action</h2>
     <div asp-validation-summary="None" class="text-danger"></div>
@@ -16,16 +16,37 @@
         }
     </section>
     <section>
-
+        @if (Model.FormMode == FormMode.Edit || Model.FormMode == FormMode.Confirm)
+        {
+            <div class="form-group">
+                <input type="text" asp-for="Username" class="form-control" placeholder="enter username">
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input asp-for="Image" style="display: none;" />
+                <div id="div@(Html.IdFor(m => m.Image))" role="button" tabindex="0" class="btn btn-secondary">ファイルを選択</div>
+                <input type="file" asp-for="Image.FormFile" style="display: none;" />
+                <input type="hidden" asp-for="Image.TempImageName" value="@Model.Image?.TempImageName">
+                <img src="@Model.Image?.Src" alt="@Model.Image?.Alt" style="; display: block; width: 400px" class="mt-2">
+                <span asp-validation-for="Image" class="text-danger"></span>
+                <script>
+                    const div = document.getElementById('div@(Html.IdFor(m => m.Image))');
+                    div.addEventListener('click', () => {
+                        document.getElementById('@Html.IdFor(m => m.Image.FormFile)').click();
+                    });
+                </script>
+            </div>
+        }
     </section>
+    <hr>
     <section>
         @if (Model.FormMode == FormMode.Confirm)
         {
-            <input type="submit" name="@Html.NameFor(m => m.ConfirmBack)" value="Edit">
+            <input type="submit" name="@Html.NameFor(m => m.ConfirmBack)" value="Edit" class="btn btn-primary">
         }
         @if (Model.FormMode == FormMode.Edit || Model.FormMode == FormMode.Confirm)
         {
-            <button type="submit">@(Model.FormMode == FormMode.Edit ? "Confirm" : "Save")</button>
+            <button type="submit" class="btn btn-primary">@(Model.FormMode == FormMode.Edit ? "Confirm" : "Save")</button>
         }
     </section>
 </form>
