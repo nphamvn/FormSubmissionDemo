@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace SubmitCheckBoxListDemo.TagHelpers;
 
-[HtmlTargetElement("input")]
+[HtmlTargetElement("input", Attributes = ForAttributeName)]
 public class CustomInputTagHelper : InputTagHelper
 {
+    private const string ForAttributeName = "asp-for";
     public CustomInputTagHelper(IHtmlGenerator generator) : base(generator)
     {
     }

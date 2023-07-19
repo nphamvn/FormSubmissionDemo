@@ -11,6 +11,10 @@ namespace SubmitCheckBoxListDemo.Models
         [ImageModelFileExtentions(new string[] { "jpg", "jpeg", "png" })]
         [ImageModelSizeRange(100, 10 * 1024)]
         public ImageModel Image { get; set; }
+        [ImageModelRequired(ErrorMessage = "Image is required")]
+        [ImageModelFileExtentions(new string[] { "jpg", "jpeg", "png" })]
+        [ImageModelSizeRange(100, 10 * 1024)]
+        public ImageModel Image2 { get; set; }
     }
     public class ImageModel
     {

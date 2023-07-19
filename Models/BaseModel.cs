@@ -1,7 +1,10 @@
-﻿namespace SubmitCheckBoxListDemo.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace SubmitCheckBoxListDemo.Models;
 
 public class BaseModel
 {
+    [FromForm(Name = "__FormMode")]
     public FormMode FormMode { get; set; } = FormMode.Edit;
     public string? ConfirmBack { get; set; }
     public bool IsConfirmBack => !string.IsNullOrEmpty(ConfirmBack);
