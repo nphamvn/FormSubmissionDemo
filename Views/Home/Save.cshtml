@@ -2,6 +2,9 @@
 @{
     var action = ViewData["Action"];
 }
+<environment include="Development">
+    <div>@Json.Serialize(Model)</div>
+</environment>
 <form method="post" enctype="multipart/form-data" form-mode="@Model.FormMode">
     <h2>@action</h2>
     <div asp-validation-summary="None" class="text-danger"></div>
@@ -21,6 +24,9 @@
                 <input type="text" asp-for="Username" class="form-control" placeholder="enter username">
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
+            for(int i = 0; i < Model.Images.Count; i++) {
+                <image-upload for="Images[i]"></image-upload>
+            }
             <image-upload for="Image"></image-upload>
             <image-upload for="Image2"></image-upload>
         }
@@ -29,7 +35,7 @@
     <section>
         @if (Model.FormMode == FormMode.Confirm)
         {
-            <input type="submit" name="@Html.NameFor(m => m.ConfirmBack)" value="Edit" class="btn btn-primary" />
+            <input type="submit" name="__ConfirmBack" value="Edit" class="btn btn-primary" />
         }
         @if (Model.FormMode == FormMode.Edit || Model.FormMode == FormMode.Confirm)
         {

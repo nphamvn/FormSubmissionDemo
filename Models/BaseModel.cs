@@ -6,6 +6,7 @@ public class BaseModel
 {
     [FromForm(Name = "__FormMode")]
     public FormMode FormMode { get; set; } = FormMode.Edit;
+    [FromForm(Name = "__ConfirmBack")]
     public string? ConfirmBack { get; set; }
     public bool IsConfirmBack => !string.IsNullOrEmpty(ConfirmBack);
 }

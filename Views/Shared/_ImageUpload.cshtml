@@ -6,7 +6,7 @@
     <div id="div_@(id)" role="button" tabindex="0" class="btn btn-secondary">ファイルを選択</div>
     <input id="input_@(id)" type="file" asp-for="FormFile" style="display: none;" />
     <input type="hidden" asp-for="TempImageName" value="@Model?.TempImageName">
-    <img id="img_@(id)" src="@Model?.Src" alt="@Model?.Alt" style="; display: block; width: 400px" class="mt-2">
+    <img id="img_@(id)" src="@Model?.Src" alt="@Model?.Alt" style="display: block; width: 400px" class="mt-2">
     <span asp-validation-for="@Model" class="text-danger"></span>
     <script>
         initImageUploader('@id');
