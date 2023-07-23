@@ -1,11 +1,30 @@
-﻿@{
+﻿@model PaginatedList<UserIndexItem>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Users</h1>
     <div class="d-flex">
-        <a class="btn btn-primary me-2" href="@Url.Action("Create")">Create</a>
-        <a class="btn btn-primary" href="@Url.Action("Edit", new { Id = 1})">Edit</a>
+        <a class="btn btn-primary me-2" href="@Url.Action(nameof(HomeController.Create))">Create</a>
     </div>
 </div>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>
+                    <a href="@Url.Action(nameof(HomeController.Edit), new {Id = user.Id})">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -6,7 +6,11 @@
     var addressStateProvinceSelectListItems = ViewBag._AddressStateProvinceSelectListItems as List<SelectListItem>;
     var profiles = ViewBag._ProfileItems as List<ProfileItem>;
     var display = Model.FormMode == FormMode.Edit ? string.Empty : "d-none";
+    var whitelistTags = ViewBag._WhiteListTags as List<SelectListItem>;
 }
+<script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/@@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
 <script src="/lib/tinymce/tinymce.min.js"></script>
 <script>
     tinymce.init({
@@ -71,15 +75,18 @@
                 <span asp-validation-for="FavoriteColorItems" class="text-danger"></span>
             </div>
             <div class="mt-2">
+                <div>Tags</div>
+                <input type="text" asp-for="TagsJson" value="@Json.Serialize(Model.Tags?.Select(t => new { Value = t.Name, Id = t.Id}))" tagify="true" />
+                <span asp-validation-for="TagsJson"></span>
+            </div>
+            <div class="mt-2 js-form-profiles">
                 <div>Profiles</div>
                 <div class="d-flex mt-1 js-profiles">
                     @for (int i = 0; i < Model.ProfileIds.Count; i++)
                     {
-                        <div class="js-profile-item">
-                            <span class="border p-2 me-1 chip">
-                                @profiles.First(p => p.Id == Model.ProfileIds[i]).Name
-                                <i role="button" class="bi bi-x remove @display"></i>
-                            </span>
+                        <div class="border p-2 me-1 js-profile">
+                            <span>@profiles.First(p => p.Id == Model.ProfileIds[i]).Name</span>
+                            <i role="button" class="bi bi-x remove @display"></i>
                             <input type="hidden" asp-for="ProfileIds[i]">
                         </div>
                     }
@@ -107,21 +114,32 @@
         }
     </section>
 </form>
-<div class="modal fade" id="profileSelectModal" tabindex="-1" aria-hidden="true">
+<script>
+    initTagsTagify();
+    function initTagsTagify() {
+        const input = document.getElementById('@Html.IdFor(m => m.TagsJson)');
+        const tagify = new Tagify(input, {
+            whitelist: JSON.parse('@Json.Serialize(whitelistTags.Select(t => new { Value = t.Text, Id = int.Parse(t.Value)}))'),
+            maxTags: 5,
+            dropdown: {
+                maxItems: 20,
+                enabled: 0
+            }
+        });
+    }
+</script>
+<div class="modal" id="profileSelectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5">Select profile(s)</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body js-modal-body">
-            </div>
-            <div class="js-selected-profiles">
-
-            </div>
-            <div class="modal-footer">
+            <div class="modal-body"></div>
+            <div class="d-flex flex-nowrap p-2 js-profiles"></div>
+            <div class="modal-footer mt-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary js-save-button">Save changes</button>
             </div>
         </div>
     </div>
@@ -136,51 +154,101 @@
         });
     });
 </script>
+<template id="tplProfileChip">
+    <div class="border p-2 me-1 js-profile">
+        <span></span>
+        <i role="button" class="bi bi-x remove"></i>
+        <input type="hidden">
+    </div>
+</template>
 <script>
     $(function () {
-        $('.js-select').on('click', function () {
-            load(null, function () {
-                $('#profileSelectModal').modal('show');
-            });
+        const maxProfileCount = 5;
+        let selectedProfiles = JSON.parse('@Json.Serialize(profiles.Select(p => new { p.Id, p.Name}))');
+        let modalSelectedProfiles = [];
+        $('.js-form-profiles .js-select').on('click', function () {
+            loadModal();
+            modalSelectedProfiles = JSON.parse(JSON.stringify(selectedProfiles));
+            $('#profileSelectModal').modal('show');
         });
+        $('body').on('click', '.js-form-profiles .js-profiles .remove', function () {
+            const id = $(this).siblings('input').val();
+            const index = selectedProfiles.findIndex(x => x.id == id);
+            if (index > -1) {
+                selectedProfiles.splice(index, 1);
+                $(this).parent('.js-profile').remove();
+                bind();
+            }
+        })
+        function bind() {
+            const html = selectedProfiles.map((p, index) => {
+                const profile = $($("#tplProfileChip").html());
+                profile.find('span').html(p.name);
+                profile.find('input').attr('name', `@(Html.NameFor(m => m.ProfileIds))[${index}]`).attr('value', p.id);
+                return profile[0].outerHTML;
+            }).join('');
+            $('.js-form-profiles .js-profiles').html(html)
+        }
 
-        $('body').on('click', '.page-item a', function (e) {
+        $('body').on('click', '#profileSelectModal .page-item a', function (e) {
             e.preventDefault();
             const url = $(this).attr('href');
-            load(url);
-        })
-        let selectedProfiles = [];
+            loadModal(url);
+        });
+
+        $('body').on('click', '#profileSelectModal .js-save-button', function () {
+            $('#profileSelectModal').modal('hide');
+            selectedProfiles = JSON.parse(JSON.stringify(modalSelectedProfiles));
+            bind();
+        });
+
         $('body').on('change', '#profileSelectModal input[type="checkbox"]', function (e) {
             const checked = $(this).prop('checked');
             const value = $(this).val();
             const text = $(this).closest('tr').find('td.js-text').text();
-            const index = selectedProfiles.findIndex(x => x.id == value);
-            if(checked) {
-                if(index === -1) {
-                    selectedProfiles.push({id: value, name: text});
+            const index = modalSelectedProfiles.findIndex(x => x.id == value);
+            if (checked && index === -1) {
+                if (modalSelectedProfiles.length < maxProfileCount) {
+                    modalSelectedProfiles.push({ id: value, name: text });
+                }
+                else {
+                    alert('You can select only 5 profiles')
                 }
             }
-            else 
-            {
-                if(index > -1) {
-                    selectedProfiles.splice(index, 1);
-                }
+            else if (!checked && index !== -1) {
+                modalSelectedProfiles.splice(index, 1);
             }
-            
-            $('.js-selected-profiles').html(JSON.stringify(selectedProfiles))
+            bindModal();
         })
-        function load(url, callback) {
+
+        $('body').on('click', '#profileSelectModal .js-profiles .remove', function () {
+            const id = $(this).siblings('input').val();
+            const index = modalSelectedProfiles.findIndex(x => x.id == id);
+            if (index > -1) {
+                modalSelectedProfiles.splice(index, 1);
+                $(this).parent('.js-profile').remove();
+                bindModal();
+            }
+        })
+        function loadModal(url) {
             url = url || '@Url.Action(nameof(HomeController.AjaxProfileList))';
-            $('.js-modal-body').load(url, function () {
-                if (callback) {
-                    callback();
-                }
-            });
+            $('#profileSelectModal .modal-body').load(url, bindModal);
         }
-    })
-</script>
-<script>
-    $('.js-profiles .chip .remove').on('click', function () {
-        $(this).closest('.js-profile-item').remove();
+        function bindModal() {
+            const checkboxes = $('#profileSelectModal .modal-body table tbody tr input[type="checkbox"]');
+            checkboxes.each((_, checkbox) => {
+                const id = $(checkbox).val();
+                const index = modalSelectedProfiles.findIndex(p => p.id == id);
+                $(checkbox).prop('checked', index !== -1);
+            });
+
+            const html = modalSelectedProfiles.map((p, index) => {
+                const profile = $($("#tplProfileChip").html());
+                profile.find('span').html(p.name);
+                profile.find('input').attr('value', p.id);
+                return profile[0].outerHTML;
+            }).join('');
+            $('#profileSelectModal .js-profiles').html(html);
+        }
     })
 </script>

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FormSubmissionDemo.Models
@@ -22,18 +23,25 @@ namespace FormSubmissionDemo.Models
 
         [Display(Name = "Address")]
         public Address Address { get; set; }
-        
+
         [Display(Name = "Skills")]
         [Required(ErrorMessage = "Please write something about you.")]
         public string Skills { get; set; }
-
         public List<int> ProfileIds { get; set; } = new();
+        public string? TagsJson { get; set; }
+        public List<Tag>? Tags { get; set; }
     }
-    public class ProfileItem {
+    public class Tag {
+        public int? Id { get; set; }
+        public string Name { get; set; }
+    }
+    public class ProfileItem
+    {
         public int Id { get; set; }
         public string Name { get; set; }
     }
-    public class Address {
+    public class Address
+    {
         [Display(Name = "Country")]
         [Required(ErrorMessage = "Please select your country.")]
         public int CountryId { get; set; }
@@ -47,21 +55,24 @@ namespace FormSubmissionDemo.Models
     public class ImageModel
     {
         public const string DefaultSrc = "img/default.jpeg";
+        public const int DefaultImageFileId = 1;
         [JsonIgnore]
         public IFormFile? FormFile { get; set; }
-
-        public string? ImageName { get; set; }
-        public string? TempImageName { get; set; }
+        public int? AppFileId { get; set; }
+        public int? TempFileId { get; set; }
         public string? Src { get; set; }
         public string? Alt { get; set; }
     }
-    public class FavoriteColorItem : CheckBoxItem {
+    public class FavoriteColorItem : CheckBoxItem
+    {
         public string Color { get; set; }
     }
-    public class CheckBoxItem {
+    public class CheckBoxItem
+    {
         public bool Checked { get; set; }
     }
-    public class CheckBoxListRequiredAttribute : RequiredAttribute {
+    public class CheckBoxListRequiredAttribute : RequiredAttribute
+    {
         public override bool IsValid(object? value)
         {
             if (value is IEnumerable<CheckBoxItem> list && list.GetEnumerator().MoveNext())
@@ -102,7 +113,7 @@ namespace FormSubmissionDemo.Models
             {
                 return new ValidationResult("Invalid value for ImageModel.");
             }
-            if (image.FormFile == null && string.IsNullOrEmpty(image.TempImageName) && string.IsNullOrEmpty(image.ImageName))
+            if (image.FormFile == null && image.AppFileId == null && image.TempFileId == null)
             {
                 return new ValidationResult(GetErrorMessage());
             }

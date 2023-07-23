@@ -35,6 +35,7 @@ public class CustomInputTagHelper : InputTagHelper
                 //await base.ProcessAsync(context, output);
                 break;
             case FormMode.Confirm:
+                _logger.LogInformation("Name: {0}, Value: {1}", For?.Name, For?.Model);
                 await GenerateConfirm(context, output);
                 break;
             case FormMode.Finish:
