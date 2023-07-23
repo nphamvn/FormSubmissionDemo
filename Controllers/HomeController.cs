@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
+using FormSubmissionDemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using SubmitCheckBoxListDemo.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace SubmitCheckBoxListDemo.Controllers;
+namespace FormSubmissionDemo.Controllers;
 
 public class HomeController : Controller
 {
@@ -25,10 +26,8 @@ public class HomeController : Controller
     [HttpGet("Create")]
     public async Task<IActionResult> Create()
     {
-        var model = new SaveModel{
-            Images = new() {
-                new(), new(), new()
-            }
+        var model = new SaveModel
+        {
         };
         return await ViewResult(model);
     }
@@ -85,7 +84,8 @@ public class HomeController : Controller
     {
         if (id != null)
         {
-            return new FileStreamResult(new FileStream(id.Value.ToString(), FileMode.Open), "image/*");
+            var filePath = Path.Combine(_environment.ContentRootPath, "Images", "3q4sinxj.pvy");
+            return new FileStreamResult(new FileStream(filePath, FileMode.Open), "image/*");
         }
         if (!string.IsNullOrEmpty(tempImageName))
         {
@@ -97,19 +97,16 @@ public class HomeController : Controller
 
     private async Task PreProcess(SaveModel model, int? id = null)
     {
-        if (model.Image is ImageModel imageModel && imageModel.FormFile is IFormFile image && image.Length > 0)
+        if (model.ProfilePicture is ImageModel imageModel && imageModel.FormFile is IFormFile image && image.Length > 0)
         {
             var filePath = await SaveTempImage(image);
-            model.Image.TempImageName = Path.GetFileName(filePath);
+            model.ProfilePicture.TempImageName = Path.GetFileName(filePath);
         }
-        if (model.Image2 is ImageModel imageModel2 && imageModel2.FormFile is IFormFile image2 && image2.Length > 0)
-        {
-            var filePath = await SaveTempImage(image2);
-            model.Image2.TempImageName = Path.GetFileName(filePath);
-        }
+        model.FavoriteColors = model.FavoriteColorItems?.Where(x => x.Checked).Select(x => x.Color).ToList() ?? new List<string>();
     }
 
-    private async Task<string> SaveTempImage(IFormFile file) {
+    private async Task<string> SaveTempImage(IFormFile file)
+    {
         var filePath = Path.Combine(_environment.ContentRootPath, "Images/temp", Path.GetRandomFileName());
         await using (var fileStream = new FileStream(filePath, FileMode.Create))
         {
@@ -119,39 +116,25 @@ public class HomeController : Controller
     }
     private void BeforeRender(SaveModel model, int? id = null)
     {
-        model.Image ??= new();
-        model.Image2 ??= new();
-        if (!string.IsNullOrEmpty(model.Image.TempImageName))
+        model.ProfilePicture ??= new();
+        if (!string.IsNullOrEmpty(model.ProfilePicture.TempImageName))
         {
-            model.Image.Src = Url.Action(nameof(Image), new { tempImageName = model.Image.TempImageName });
+            model.ProfilePicture.Src = Url.Action(nameof(Image), new { tempImageName = model.ProfilePicture.TempImageName });
         }
         else if (id != null)
         {
-            model.Image.Src = Url.Action(nameof(Image), new { id = id.Value });
+            model.ProfilePicture.Src = Url.Action(nameof(Image), new { id = id.Value });
         }
-        if (!string.IsNullOrEmpty(model.Image2.TempImageName))
-        {
-            model.Image2.Src = Url.Action(nameof(Image), new { tempImageName = model.Image2.TempImageName });
-        }
-        else if (id != null)
-        {
-            model.Image2.Src = Url.Action(nameof(Image), new { id = id.Value });
-        }
-        model.Image.Src ??= ImageModel.DefaultSrc;
-        model.Image2.Src ??= ImageModel.DefaultSrc;
+        model.ProfilePicture.Src ??= ImageModel.DefaultSrc;
 
-        foreach (var imageModel in model.Images)
+        //
+        var favoriteColorSelectListItems = ViewBag._FavoriteColorSelectListItems as List<SelectListItem>;
+        model.FavoriteColorItems = favoriteColorSelectListItems.Select(i => new FavoriteColorItem()
         {
-            if (!string.IsNullOrEmpty(imageModel.TempImageName))
-            {
-                imageModel.Src = Url.Action(nameof(Image), new { tempImageName = imageModel.TempImageName });
-            }
-            else if (id != null)
-            {
-                imageModel.Src = Url.Action(nameof(Image), new { id = id.Value });
-            }
-            imageModel.Src ??= ImageModel.DefaultSrc;
-        }
+            Color = i.Value,
+            Checked = model.FavoriteColors?.Contains(i.Value) ?? false
+        }).ToList();
+
     }
     private async Task Validate(SaveModel model, ModelStateDictionary modelState, int? id = null)
     {
@@ -159,16 +142,10 @@ public class HomeController : Controller
     }
     private async Task Save(SaveModel model)
     {
-        if (!string.IsNullOrEmpty(model?.Image?.TempImageName))
+        if (!string.IsNullOrEmpty(model?.ProfilePicture?.TempImageName))
         {
-            var sourceFile = Path.Combine(_environment.ContentRootPath, "Images/temp", model.Image.TempImageName);
-            var destinationFile = Path.Combine(_environment.ContentRootPath, "Images", model.Image.TempImageName);
-            await CopyFileAsync(sourceFile, destinationFile);
-        }
-        if (!string.IsNullOrEmpty(model?.Image2?.TempImageName))
-        {
-            var sourceFile = Path.Combine(_environment.ContentRootPath, "Images/temp", model.Image2.TempImageName);
-            var destinationFile = Path.Combine(_environment.ContentRootPath, "Images", model.Image2.TempImageName);
+            var sourceFile = Path.Combine(_environment.ContentRootPath, "Images/temp", model.ProfilePicture.TempImageName);
+            var destinationFile = Path.Combine(_environment.ContentRootPath, "Images", model.ProfilePicture.TempImageName);
             await CopyFileAsync(sourceFile, destinationFile);
         }
     }
@@ -182,15 +159,105 @@ public class HomeController : Controller
     {
         return new SaveModel
         {
-
+            Username = "Nam Pham",
+            ProfilePicture = new ImageModel()
+            {
+                ImageName = "3q4sinxj.pvy"
+            },
+            Address = new Address()
+            {
+                CountryId = 1,
+                StateProvinceId = 1,
+                City = "Can Loc"
+            },
+            Skills = "I AM GIFTED",
+            ProfileIds = Enumerable.Range(0, 10).Select(x => x).ToList(),
+            FavoriteColors = new() { "red", "orange" }
         };
     }
     private async Task<IActionResult> ViewResult(SaveModel model, int? id = null)
     {
-        ViewBag._Data = "ViewBagData";
+        ViewBag._FavoriteColorSelectListItems = GetFavoriteColorSelectListItems();
+        ViewBag._AddressCountrySelectListItems = GetAddressCountrySelectListItems();
+        ViewBag._AddressStateProvinceSelectListItems = GetCountryStateProvinceSelectListItems(model.Address?.CountryId ?? 0);
+        ViewBag._ProfileItems = GetProfileItems(model.ProfileIds);
         ViewData["Action"] = id == null ? "Create" : "Edit";
         BeforeRender(model);
-        return View("Views/Home/Save.cshtml", model);
+        return View("/Views/Home/Save.cshtml", model);
+    }
+
+    private List<ProfileItem> GetProfileItems(List<int> profileIds)
+    {
+        return profileIds.Select(id => new ProfileItem()
+        {
+            Id = id,
+            Name = $"Profile {id}"
+        }).ToList();
+    }
+
+    private List<SelectListItem> GetFavoriteColorSelectListItems()
+    {
+        return new()
+        {
+            new("Red", "red"),
+            new("Indigo", "indigo"),
+            new("Orange", "orange")
+        };
+    }
+
+    [HttpGet("AjaxCountryStateProvinceOptionsPartial")]
+    public async Task<IActionResult> AjaxCountryStateProvinceOptionsPartial(int countryId)
+    {
+        ViewBag._Options = GetCountryStateProvinceSelectListItems(countryId); ;
+        return PartialView("/Views/Home/_SelectOptionsPartial.cshtml");
+    }
+
+    [HttpGet("AjaxProfileList")]
+    public async Task<IActionResult> AjaxProfileList(int? page)
+    {
+        var model = PaginatedList<ProfileItem>.Create(GetProfileItems(), page ?? 1, 10);
+        return PartialView("/Views/Home/_ProfileList.cshtml", model);
+    }
+
+    private static IQueryable<ProfileItem> GetProfileItems()
+    {
+        return Enumerable.Range(1, 100).Select(i => new ProfileItem()
+        {
+            Id = i,
+            Name = $"Profile {i}"
+        }).AsQueryable();
+    }
+
+    private List<SelectListItem> GetCountryStateProvinceSelectListItems(int countryId)
+    {
+        if (countryId == 1)
+        {
+            return new() {
+                new("Ha Tinh", 1.ToString()),
+                new("Ha Noi", 2.ToString()),
+            };
+        }
+        else if (countryId == 2)
+        {
+            return new() {
+                new("Tokyo", 1.ToString()),
+                new("Osaka", 2.ToString()),
+            };
+        }
+        else
+        {
+            return new();
+        }
+    }
+
+    private List<SelectListItem> GetAddressCountrySelectListItems()
+    {
+        return new()
+        {
+            new("Select country", string.Empty),
+            new("VietNam", 1.ToString()),
+            new("Japan", 2.ToString()),
+        };
     }
 
     public IActionResult Privacy()

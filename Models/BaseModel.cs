@@ -1,12 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace SubmitCheckBoxListDemo.Models;
+namespace FormSubmissionDemo.Models;
 
 public class BaseModel
-{
-    [FromForm(Name = "__FormMode")]
+{   
+    public const string ConfirmBackFormName = "__ConfirmBack";
+    public const string FormModeFormName = "__FormMode";
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [FromForm(Name = FormModeFormName)]
     public FormMode FormMode { get; set; } = FormMode.Edit;
-    [FromForm(Name = "__ConfirmBack")]
+    [FromForm(Name = ConfirmBackFormName)]
+    [JsonIgnore]
     public string? ConfirmBack { get; set; }
     public bool IsConfirmBack => !string.IsNullOrEmpty(ConfirmBack);
 }

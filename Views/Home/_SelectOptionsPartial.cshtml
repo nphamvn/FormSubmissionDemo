@@ -1,0 +1,7 @@
+@{
+    var options = ViewBag._Options as List<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+}
+@foreach (var option in options )
+{
+    <option value="@option.Value">@option.Text</option>
+}

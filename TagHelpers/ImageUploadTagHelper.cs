@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
+﻿using FormSubmissionDemo.Models;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using SubmitCheckBoxListDemo.Models;
 
-namespace SubmitCheckBoxListDemo.TagHelpers;
+namespace FormSubmissionDemo.TagHelpers;
 
 [HtmlTargetElement("image-upload", Attributes = ForAttributeName)]
 public class ImageUploadTagHelper: PartialTagHelper
@@ -14,11 +14,19 @@ public class ImageUploadTagHelper: PartialTagHelper
 
     public ImageUploadTagHelper(ICompositeViewEngine viewEngine, IViewBufferScope viewBufferScope) : base(viewEngine, viewBufferScope)
     {
-        
+        Name = "/Views/Shared/_ImageUpload.cshtml";
     }
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
-        Name = "/Views/Shared/_ImageUpload.cshtml";
+        if (context.Items.ContainsKey("FormMode"))
+        {
+            var formMode = (FormMode)context.Items["FormMode"];
+            ViewContext.ViewData["FormMode"] = formMode;
+        }
+        else
+        {
+            ViewContext.ViewData["FormMode"] = FormMode.Edit;
+        }
         await base.ProcessAsync(context, output);
     }
 }

@@ -1,30 +1,75 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.Text.Json.Serialization;
 
-namespace SubmitCheckBoxListDemo.Models
+namespace FormSubmissionDemo.Models
 {
     public class SaveModel : BaseModel
     {
-        [Required]
+        [Display(Name = "Name")]
+        [Required(ErrorMessage = "Please enter your name.")]
         public string Username { get; set; }
+
+        [Display(Name = "Profile Picture")]
         [ImageModelRequired(ErrorMessage = "Image is required")]
         [ImageModelFileExtentions(new string[] { "jpg", "jpeg", "png" })]
         [ImageModelSizeRange(100, 10 * 1024)]
-        public ImageModel Image { get; set; }
-        [ImageModelRequired(ErrorMessage = "Image2 is required")]
-        [ImageModelFileExtentions(new string[] { "jpg", "jpeg", "png" })]
-        [ImageModelSizeRange(100, 10 * 1024)]
-        public ImageModel Image2 { get; set; }
+        public ImageModel ProfilePicture { get; set; }
 
-        public List<ImageModel> Images { get; set; }
+        [Display(Name = "Favorite Colors")]
+        [CheckBoxListRequired(ErrorMessage = "At least one color must be selected")]
+        public List<FavoriteColorItem> FavoriteColorItems { get; set; } = new();
+        public List<string>? FavoriteColors { get; set; }
+
+        [Display(Name = "Address")]
+        public Address Address { get; set; }
+        
+        [Display(Name = "Skills")]
+        [Required(ErrorMessage = "Please write something about you.")]
+        public string Skills { get; set; }
+
+        public List<int> ProfileIds { get; set; } = new();
+    }
+    public class ProfileItem {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+    public class Address {
+        [Display(Name = "Country")]
+        [Required(ErrorMessage = "Please select your country.")]
+        public int CountryId { get; set; }
+        [Display(Name = "State/Province")]
+        [Required(ErrorMessage = "Please select your state/procine.")]
+        public int StateProvinceId { get; set; }
+        [Display(Name = "City")]
+        [Required(ErrorMessage = "Please enter your city.")]
+        public string City { get; set; }
     }
     public class ImageModel
     {
         public const string DefaultSrc = "img/default.jpeg";
+        [JsonIgnore]
         public IFormFile? FormFile { get; set; }
+
+        public string? ImageName { get; set; }
         public string? TempImageName { get; set; }
         public string? Src { get; set; }
         public string? Alt { get; set; }
+    }
+    public class FavoriteColorItem : CheckBoxItem {
+        public string Color { get; set; }
+    }
+    public class CheckBoxItem {
+        public bool Checked { get; set; }
+    }
+    public class CheckBoxListRequiredAttribute : RequiredAttribute {
+        public override bool IsValid(object? value)
+        {
+            if (value is IEnumerable<CheckBoxItem> list && list.GetEnumerator().MoveNext())
+            {
+                return list.Any(i => i.Checked);
+            }
+            return false;
+        }
     }
     public class ImageModelFileExtentions : ValidationAttribute
     {
@@ -57,7 +102,7 @@ namespace SubmitCheckBoxListDemo.Models
             {
                 return new ValidationResult("Invalid value for ImageModel.");
             }
-            if (image.FormFile == null && string.IsNullOrEmpty(image.TempImageName))
+            if (image.FormFile == null && string.IsNullOrEmpty(image.TempImageName) && string.IsNullOrEmpty(image.ImageName))
             {
                 return new ValidationResult(GetErrorMessage());
             }

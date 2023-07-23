@@ -1,4 +1,4 @@
-﻿namespace SubmitCheckBoxListDemo.Models.ImageUpload;
+﻿namespace FormSubmissionDemo.Models.ImageUpload;
 
 public class ImageUploadSaveModel : BaseModel
 {

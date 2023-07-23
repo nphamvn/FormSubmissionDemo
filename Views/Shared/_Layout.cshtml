@@ -4,34 +4,23 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SubmitCheckBoxListDemo</title>
+    <title>@ViewData["Title"] - FormSubmissionDemo</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SubmitCheckBoxListDemo.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/FormSubmissionDemo.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial.cshtml" />
+    @await RenderSectionAsync("Scripts", required: false)
 </head>
 
 <body>
-    <script>
-        function initImageUploader(id) {
-            const div = document.getElementById(`div_${id}`);
-            const input = document.getElementById(`input_${id}`);
-            const img = document.getElementById(`img_${id}`);
-            input.addEventListener('change', function (e) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            });
-            div.addEventListener('click', () => input.click());
-        }
-    </script>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SubmitCheckBoxListDemo</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FormSubmissionDemo</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -58,14 +47,9 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - SubmitCheckBoxListDemo - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2023 - FormSubmissionDemo - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <partial name="_ValidationScriptsPartial.cshtml">
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>

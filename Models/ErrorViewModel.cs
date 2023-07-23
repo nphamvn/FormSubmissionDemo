@@ -1,4 +1,4 @@
-namespace SubmitCheckBoxListDemo.Models;
+namespace FormSubmissionDemo.Models;
 
 public class ErrorViewModel
 {
