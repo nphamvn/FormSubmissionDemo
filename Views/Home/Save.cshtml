@@ -76,8 +76,8 @@
             </div>
             <div class="mt-2">
                 <div>Tags</div>
-                <input type="text" asp-for="TagsJson" value="@Json.Serialize(Model.Tags?.Select(t => new { Value = t.Name, Id = t.Id}))" tagify="true" />
-                <span asp-validation-for="TagsJson"></span>
+                <tagify asp-for="Tags" options="new TagifyOptions(){}"></tagify>
+                <span asp-validation-for="Tags"></span>
             </div>
             <div class="mt-2 js-form-profiles">
                 <div>Profiles</div>
@@ -115,18 +115,37 @@
     </section>
 </form>
 <script>
-    initTagsTagify();
-    function initTagsTagify() {
-        const input = document.getElementById('@Html.IdFor(m => m.TagsJson)');
-        const tagify = new Tagify(input, {
-            whitelist: JSON.parse('@Json.Serialize(whitelistTags.Select(t => new { Value = t.Text, Id = int.Parse(t.Value)}))'),
-            maxTags: 5,
-            dropdown: {
-                maxItems: 20,
-                enabled: 0
+    $(function () {
+        $('input[type="text"].js-tagify').each(function () {
+            const whitelist = $(this).data('whitelist');
+            const tagify = new Tagify($(this)[0], {
+                maxTags: 5,
+                dropdown: {
+                    maxItems: 20,
+                    enabled: 0
+                }
+            });
+        })
+    })
+</script>
+<script>
+    $(function () {
+        $('form').submit(function () {
+            let html = '';
+            $('input.js-tagify').each(function () {
+                const name = $(this).attr('name');
+                const tags = JSON.parse($(this).val());
+                html += tags.map((tag, index) => {
+                    return `<input type="hidden" name="${name}[${index}].Name" value="${tag.value}"/><input type="hidden" name="${name}[${index}].Id" value="${tag.id}"/>`
+                }).join('')
+                $(this).remove();
+            })
+            if (html) {
+                $(this).append(html);
             }
+            return true;
         });
-    }
+    })
 </script>
 <div class="modal" id="profileSelectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">

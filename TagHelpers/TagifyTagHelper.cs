@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 using FormSubmissionDemo.Models;
+using FormSubmissionDemo.Models.Common;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -8,13 +10,23 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace FormSubmissionDemo.TagHelpers;
 
-[HtmlTargetElement("input", Attributes = "tagify", TagStructure = TagStructure.Unspecified)]
+[HtmlTargetElement("tagify")]
 public class TagifyTagHelper(IHtmlGenerator generator
     , ILogger<TagifyTagHelper> logger) : InputTagHelper(generator)
 {
+    private const string ForAttribute = "asp-for";
+    private const string OptionsAttribute = "options";
+
+    [HtmlAttributeName(ForAttribute)]
+    public ModelExpression For { get; set; }
+
+    [HtmlAttributeName(OptionsAttribute)]
+    public TagifyOptions Options { get; set; }
+
+    public List<Tag> Tags => For.Model as List<Tag>;
+
     private readonly ILogger<TagifyTagHelper> _logger = logger;
-    [HtmlAttributeName("tagify")]
-    public bool IsTagify { get; set; }
+
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         if (!context.Items.ContainsKey("FormMode"))
@@ -39,28 +51,41 @@ public class TagifyTagHelper(IHtmlGenerator generator
 
     private async Task ProcessEditMode(TagHelperContext context, TagHelperOutput output)
     {
-        
+        var json = JsonSerializer.Serialize(Tags?.Select(t => new { Value = t.Name, Id = t.Id }), new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        _logger.LogInformation("Json: {0}", json);
+        output.TagName = null;
+        output.Attributes.Clear();
+        output.Content.Clear();
+
+        var input = Generator.GenerateTextBox(ViewContext, For.ModelExplorer, For.Name, json, null, null);
+        input.AddCssClass("js-tagify");
+        input.Attributes.Add("data-my-whitelist", JsonSerializer.Serialize(Tags?.Select(t => new { Value = t.Name, Id = t.Id}), new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
+        output.Content.SetHtmlContent(input);
     }
 
     private async Task ProcessConfirmMode(TagHelperContext context, TagHelperOutput output)
     {
-        //await base.ProcessAsync(context, output);
-        output.Attributes.SetAttribute("type", "hidden");
-        var json = For.Model?.ToString();
-        _logger.LogInformation("Name: {0}, Value: {1}", For?.Name, json);
-        var tags = JsonSerializer.Deserialize<List<Tag>>(json);
-        var postElementDiv = new TagBuilder("div");
-        postElementDiv.AddCssClass("post-element");
-        foreach (var tag in tags)
+        output.TagName = "div";
+        output.AddClass("d-flex", HtmlEncoder.Default);
+        foreach (var tag in Tags)
         {
-            //_logger.LogInformation("Name: {0}, Value: {1}", For?.Name, tag.Value);
-            postElementDiv.InnerHtml.AppendHtml($"<span>{tag.Value}</span>");
+            var span = new TagBuilder("span");
+            span.AddCssClass("border p-2 me-2");
+            span.InnerHtml.AppendHtml(tag.Name);
+            output.Content.AppendHtml(span);
         }
-        output.PostElement.SetHtmlContent(postElementDiv);
+        for (int i = 0; i < Tags.Count; i++)
+        {
+            var name = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Name", Tags[i].Name, false, null);
+            output.Content.AppendHtml(name);
+            var id = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Id", Tags[i].Id, false, null);
+            output.Content.AppendHtml(id);
+        }
     }
-}
-public class Tag {
-
-    [JsonPropertyName("value")]
-    public string Value { get; set; }
 }
