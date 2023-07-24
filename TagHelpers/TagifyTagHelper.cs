@@ -51,15 +51,14 @@ public class TagifyTagHelper(IHtmlGenerator generator
 
     private async Task ProcessEditMode(TagHelperContext context, TagHelperOutput output)
     {
+        output.TagName = null;
+        output.Attributes.Clear();
+        output.Content.Clear();
+        //output.Attributes.TryGetAttributes("class", out var classes);
         var json = JsonSerializer.Serialize(Tags?.Select(t => new { Value = t.Name, Id = t.Id }), new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
-        _logger.LogInformation("Json: {0}", json);
-        output.TagName = null;
-        output.Attributes.Clear();
-        output.Content.Clear();
-
         var input = Generator.GenerateTextBox(ViewContext, For.ModelExplorer, For.Name, json, null, null);
         input.AddCssClass("js-tagify");
         input.Attributes.Add("data-my-whitelist", JsonSerializer.Serialize(Tags?.Select(t => new { Value = t.Name, Id = t.Id}), new JsonSerializerOptions
@@ -73,17 +72,16 @@ public class TagifyTagHelper(IHtmlGenerator generator
     {
         output.TagName = "div";
         output.AddClass("d-flex", HtmlEncoder.Default);
-        foreach (var tag in Tags)
-        {
-            var span = new TagBuilder("span");
-            span.AddCssClass("border p-2 me-2");
-            span.InnerHtml.AppendHtml(tag.Name);
-            output.Content.AppendHtml(span);
-        }
         for (int i = 0; i < Tags.Count; i++)
         {
+            var span = new TagBuilder("span");
+            span.AddCssClass("badge bg-secondary p-2 me-2");
+            span.InnerHtml.AppendHtml(Tags[i].Name);
+            output.Content.AppendHtml(span);
+
             var name = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Name", Tags[i].Name, false, null);
             output.Content.AppendHtml(name);
+            
             var id = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Id", Tags[i].Id, false, null);
             output.Content.AppendHtml(id);
         }

@@ -5,6 +5,10 @@
     {
       "library": "tinymce@6.6.0",
       "destination": "wwwroot/lib/tinymce"
+    },
+    {
+      "library": "tagify@4.17.8",
+      "destination": "wwwroot/lib/tagify"
     }
   ]
 }

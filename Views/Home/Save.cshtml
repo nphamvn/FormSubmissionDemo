@@ -1,6 +1,6 @@
 @model FormSubmissionDemo.Models.SaveModel
 @{
-    var action = ViewData["Action"];
+    var action = ViewData[nameof(FormSubmissionDemo.Enums.Action)];
     var favoriteColorSelectListItems = ViewBag._FavoriteColorSelectListItems as List<SelectListItem>;
     var addressCountrySelectListItems = ViewBag._AddressCountrySelectListItems as List<SelectListItem>;
     var addressStateProvinceSelectListItems = ViewBag._AddressStateProvinceSelectListItems as List<SelectListItem>;
@@ -19,6 +19,7 @@
 </script>
 <form method="post" enctype="multipart/form-data" form-mode="@Model.FormMode">
     <h2>@action (@Model.FormMode)</h2>
+    <button type="button" class="btn btn-info text-white" onclick="downloadJson()">Download Json</button>
     <div asp-validation-summary="None" class="text-danger"></div>
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div asp-validation-summary="All" class="text-danger"></div>
@@ -76,7 +77,7 @@
             </div>
             <div class="mt-2">
                 <div>Tags</div>
-                <tagify asp-for="Tags" options="new TagifyOptions(){}"></tagify>
+                <tagify asp-for="Tags" options="new TagifyOptions(){}" class="form-control"></tagify>
                 <span asp-validation-for="Tags"></span>
             </div>
             <div class="mt-2 js-form-profiles">
@@ -84,9 +85,9 @@
                 <div class="d-flex mt-1 js-profiles">
                     @for (int i = 0; i < Model.ProfileIds.Count; i++)
                     {
-                        <div class="border p-2 me-1 js-profile">
+                        <div class="badge bg-secondary p-2 me-1 js-profile">
                             <span>@profiles.First(p => p.Id == Model.ProfileIds[i]).Name</span>
-                            <i role="button" class="bi bi-x remove @display"></i>
+                            <i role="button" class="bi bi-x ms-2 remove @display"></i>
                             <input type="hidden" asp-for="ProfileIds[i]">
                         </div>
                     }
@@ -114,6 +115,11 @@
         }
     </section>
 </form>
+<script>
+    function downloadJson() {
+        const url = '@Url.Action(nameof(HomeController.DownloadJson), new { Id = 1})';
+    }
+</script>
 <script>
     $(function () {
         $('input[type="text"].js-tagify').each(function () {
@@ -174,7 +180,7 @@
     });
 </script>
 <template id="tplProfileChip">
-    <div class="border p-2 me-1 js-profile">
+    <div class="badge bg-secondary text-dark p-2 me-1 js-profile">
         <span></span>
         <i role="button" class="bi bi-x remove"></i>
         <input type="hidden">

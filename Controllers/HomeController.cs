@@ -43,11 +43,17 @@ public class HomeController : Controller
         return await ViewResult(model);
     }
 
-    [HttpGet("Edit/{Id:int}")]
+    [HttpGet("{Id:int}/Edit")]
     public async Task<IActionResult> Edit(int Id)
     {
         var model = await GetSaveModel(Id);
         return await ViewResult(model, Id);
+    }
+
+    [HttpGet("{Id:int}/DownloadJson")]
+    public async Task<IActionResult> DownloadJson(int Id)
+    {
+        return new EmptyResult();
     }
 
     [HttpPost("Create")]
