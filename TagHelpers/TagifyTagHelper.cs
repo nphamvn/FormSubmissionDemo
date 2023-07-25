@@ -12,20 +12,25 @@ namespace FormSubmissionDemo.TagHelpers;
 
 [HtmlTargetElement("tagify")]
 public class TagifyTagHelper(IHtmlGenerator generator
-    , ILogger<TagifyTagHelper> logger) : InputTagHelper(generator)
+    , ILogger<TagifyTagHelper> logger) : TagHelper
 {
+    private readonly ILogger<TagifyTagHelper> _logger = logger;
+    private readonly IHtmlGenerator _generator = generator;
+
     private const string ForAttribute = "asp-for";
     private const string OptionsAttribute = "options";
-
+    
     [HtmlAttributeName(ForAttribute)]
     public ModelExpression For { get; set; }
 
     [HtmlAttributeName(OptionsAttribute)]
     public TagifyOptions Options { get; set; }
 
-    public List<Tag> Tags => For.Model as List<Tag>;
+    [HtmlAttributeNotBound]
+    [ViewContext]
+    public ViewContext ViewContext { get; set; }
 
-    private readonly ILogger<TagifyTagHelper> _logger = logger;
+    public List<Tag> Tags => For.Model as List<Tag>;
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
@@ -59,7 +64,7 @@ public class TagifyTagHelper(IHtmlGenerator generator
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
-        var input = Generator.GenerateTextBox(ViewContext, For.ModelExplorer, For.Name, json, null, null);
+        var input = _generator.GenerateTextBox(ViewContext, For.ModelExplorer, For.Name, json, null, null);
         input.AddCssClass("js-tagify");
         input.Attributes.Add("data-my-whitelist", JsonSerializer.Serialize(Tags?.Select(t => new { Value = t.Name, Id = t.Id}), new JsonSerializerOptions
         {
@@ -79,10 +84,10 @@ public class TagifyTagHelper(IHtmlGenerator generator
             span.InnerHtml.AppendHtml(Tags[i].Name);
             output.Content.AppendHtml(span);
 
-            var name = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Name", Tags[i].Name, false, null);
+            var name = _generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Name", Tags[i].Name, false, null);
             output.Content.AppendHtml(name);
             
-            var id = Generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Id", Tags[i].Id, false, null);
+            var id = _generator.GenerateHidden(ViewContext, For.ModelExplorer, For.Name + $"[{i}].Id", Tags[i].Id, false, null);
             output.Content.AppendHtml(id);
         }
     }
