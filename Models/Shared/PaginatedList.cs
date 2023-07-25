@@ -1,4 +1,4 @@
-﻿namespace FormSubmissionDemo;
+﻿namespace FormSubmissionDemo.Models.Shared;
 
 public class PaginatedList<T> : List<T>
 {

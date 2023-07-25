@@ -1,12 +1,11 @@
-@model FormSubmissionDemo.Models.SaveModel
+@model FormSubmissionDemo.Models.Users.UserSaveViewModel
 @{
-    var action = ViewData[nameof(FormSubmissionDemo.Enums.Action)];
-    var favoriteColorSelectListItems = ViewBag._FavoriteColorSelectListItems as List<SelectListItem>;
-    var addressCountrySelectListItems = ViewBag._AddressCountrySelectListItems as List<SelectListItem>;
-    var addressStateProvinceSelectListItems = ViewBag._AddressStateProvinceSelectListItems as List<SelectListItem>;
-    var profiles = ViewBag._ProfileItems as List<ProfileItem>;
+    var action = ViewData["Action"];
+    var favoriteColorSelectListItems = Model.FavoriteColorSelectListItems;
+    var addressCountrySelectListItems = Model.AddressCountrySelectListItems;
+    var addressStateProvinceSelectListItems = Model.AddressStateProvinceSelectListItems;
+    var profiles = Model.ProfileItems;
     var display = Model.FormMode == FormMode.Edit ? string.Empty : "d-none";
-    var whitelistTags = ViewBag._WhiteListTags as List<SelectListItem>;
 }
 <script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
@@ -107,7 +106,7 @@
     <section>
         @if (Model.FormMode == FormMode.Confirm)
         {
-            <input type="submit" name="@BaseModel.ConfirmBackFormName" value="Edit" class="btn btn-primary" />
+            <input type="submit" name="@BasePostModel.ConfirmBackFormName" value="Edit" class="btn btn-primary" />
         }
         @if (Model.FormMode == FormMode.Edit || Model.FormMode == FormMode.Confirm)
         {
@@ -117,7 +116,7 @@
 </form>
 <script>
     function downloadJson() {
-        const url = '@Url.Action(nameof(HomeController.DownloadJson), new { Id = 1})';
+        const url = '@Url.Action(nameof(UsersController.DownloadJson), new { Id = 1})';
     }
 </script>
 <script>
@@ -256,7 +255,7 @@
             }
         })
         function loadModal(url) {
-            url = url || '@Url.Action(nameof(HomeController.AjaxProfileList))';
+            url = url || '@Url.Action(nameof(UsersController.AjaxProfileList))';
             $('#profileSelectModal .modal-body').load(url, bindModal);
         }
         function bindModal() {

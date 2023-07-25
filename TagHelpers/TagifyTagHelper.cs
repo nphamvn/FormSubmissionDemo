@@ -1,8 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using FormSubmissionDemo.Models;
-using FormSubmissionDemo.Models.Common;
-using Microsoft.AspNetCore.Html;
+using FormSubmissionDemo.Models.Shared;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -30,7 +28,7 @@ public class TagifyTagHelper(IHtmlGenerator generator
     [ViewContext]
     public ViewContext ViewContext { get; set; }
 
-    public List<Tag> Tags => For.Model as List<Tag>;
+    public List<TagfifyTag> Tags => For.Model as List<TagfifyTag>;
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {

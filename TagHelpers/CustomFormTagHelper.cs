@@ -22,7 +22,7 @@ public class CustomFormTagHelper : FormTagHelper
         await base.ProcessAsync(context, output);
         var input = new TagBuilder("input");
         input.Attributes.Add("type", "hidden");
-        input.Attributes.Add("name", BaseModel.FormModeFormName);
+        input.Attributes.Add("name", BasePostModel.FormModeFormName);
         input.Attributes.Add("value", FormMode.ToString());
         output.PostContent.AppendHtml(input);
         context.Items["FormMode"] = FormMode;

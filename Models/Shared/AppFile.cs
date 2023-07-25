@@ -1,6 +1,6 @@
-﻿namespace FormSubmissionDemo.Entities;
+﻿namespace FormSubmissionDemo.Models.Shared;
 
-public class TempFile
+public class AppFile
 {
     public int Id { get; set; }
     public byte[] Content { get; set; }

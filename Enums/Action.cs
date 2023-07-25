@@ -1,4 +1,4 @@
-﻿namespace FormSubmissionDemo.Enums;
+﻿namespace FormSubmissionDemo;
 
 public enum Action
 {

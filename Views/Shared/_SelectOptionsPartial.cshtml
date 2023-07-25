@@ -1,5 +1,5 @@
 @{
-    var options = ViewBag._Options as List<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var options = ViewBag._Options as List<SelectListItem> ?? throw new ArgumentNullException();
 }
 @foreach (var option in options )
 {

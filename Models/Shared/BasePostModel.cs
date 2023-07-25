@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FormSubmissionDemo.Models;
+namespace FormSubmissionDemo.Models.Shared;
 
-public class BaseModel
+public abstract class BasePostModel
 {   
     public const string ConfirmBackFormName = "__ConfirmBack";
     public const string FormModeFormName = "__FormMode";
@@ -11,6 +11,7 @@ public class BaseModel
     [JsonConverter(typeof(JsonStringEnumConverter))]
     [FromForm(Name = FormModeFormName)]
     public FormMode FormMode { get; set; } = FormMode.Edit;
+
     [FromForm(Name = ConfirmBackFormName)]
     [JsonIgnore]
     public string? ConfirmBack { get; set; }
