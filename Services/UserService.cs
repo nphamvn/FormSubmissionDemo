@@ -1,4 +1,5 @@
 ﻿using FormSubmissionDemo.Data.Repositories;
+using FormSubmissionDemo.Entities;
 using FormSubmissionDemo.Models.Users;
 using FormSubmissionDemo.Models.Shared;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -12,7 +13,7 @@ public interface IUserService
     Task<UserModel> GetUserModel(int userId);
     Task<UserSaveViewModel> GetCreateViewModel();
     Task ValidateCreate(UserSaveViewModel userSaveViewModel, ModelStateDictionary modelState);
-    Task<int> Create(UserSaveViewModel userSaveViewModel);
+    Task<int> Create(UserSaveViewModel model);
     Task<UserSaveViewModel> GetEditViewModel(int userId);
     Task ValidateEdit(int userId, UserSaveViewModel userSaveViewModel, ModelStateDictionary modelState);
     Task Edit(int userId, UserSaveViewModel userSaveViewModel);
@@ -30,7 +31,13 @@ public class UserService : BaseService, IUserService
 
     public async Task<UserModel> GetUserModel(int userId)
     {
-        throw new NotImplementedException();
+        var entity = await _userRepository.Get(userId);
+        return new ()
+        {
+            UserId  = entity.UserId,
+            Username = entity.Username,
+            ProfileImageFileId = entity.ProfileFileId
+        };
     }
 
     public async Task<UserSaveViewModel> GetCreateViewModel()
@@ -48,26 +55,47 @@ public class UserService : BaseService, IUserService
 
     public async Task ValidateCreate(UserSaveViewModel userSaveViewModel, ModelStateDictionary modelState)
     {
-        throw new NotImplementedException();
+        if(!modelState.IsValid) return;
+        //TODO: Do validation
     }
 
-    public Task<int> Create(UserSaveViewModel userSaveViewModel)
+    public async Task<int> Create(UserSaveViewModel model)
     {
-        throw new NotImplementedException();
+        var id = await _userRepository.Add(new UserEntity()
+        {
+            Username = model.Username,
+            ProfileFileId = model.ProfilePicture.AppFileId.Value
+        });
+        return id;
     }
 
-    public Task<UserSaveViewModel> GetEditViewModel(int userId)
+    public async Task<UserSaveViewModel> GetEditViewModel(int userId)
     {
-        throw new NotImplementedException();
+        var entity = await _userRepository.Get(userId);
+        var vm = new UserSaveViewModel
+        {
+            Username = entity.Username,
+            //FavoriteColorSelectListItems = GetFavoriteColorSelectListItems(),
+            // AddressCountrySelectListItems = GetAddressCountrySelectListItems(),
+            // AddressStateProvinceSelectListItems = GetCountryStateProvinceSelectListItems(model.Address?.CountryId ?? 0),
+            // ProfileItems = GetProfileItems(model.ProfileIds),
+            // TagfifyTagWhiteList = GetWhiteListTags()
+        };
+        return vm;
     }
 
     public async Task ValidateEdit(int userId, UserSaveViewModel userSaveViewModel, ModelStateDictionary modelState)
     {
-        throw new NotImplementedException();
+        if(!modelState.IsValid) return;
+        //TODO: Do validation
     }
 
-    public async Task Edit(int userId, UserSaveViewModel userSaveViewModel)
+    public async Task Edit(int userId, UserSaveViewModel model)
     {
+        await _userRepository.Update(userId, new UserEntity()
+        {
+            Username = model.Username
+        });
     }
     
 

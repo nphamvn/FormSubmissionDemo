@@ -1,4 +1,4 @@
-﻿using FormSubmissionDemo.Entities;
+using FormSubmissionDemo.Entities;
 
 namespace FormSubmissionDemo.Data;
 
@@ -16,7 +16,7 @@ public static class Seeder
         dbContext.Files.Add(defaultUserImage);
         dbContext.Users.Add(new()
         {
-            Id = 1,
+            UserId = 1,
             Username = "Nam Pham",
             ProfileFileId = defaultUserImage.Id
         });

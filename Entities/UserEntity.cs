@@ -2,7 +2,7 @@
 
 public class UserEntity : BaseEntity
 {
-    public int Id { get; set; }
+    public int UserId { get; set; }
     public int ProfileFileId { get; set; }
     public string Username { get; set; }
 }
