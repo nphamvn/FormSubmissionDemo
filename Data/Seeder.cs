@@ -9,8 +9,8 @@ public static class Seeder
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetService<AppDbContext>();
 
-        var defaultUserImage = new AppFile() {
-            Id = 1,
+        var defaultUserImage = new AppFileEntity() {
+            FileId = 1,
             Content = File.ReadAllBytes("Images/user.png")
         };
         dbContext.Files.Add(defaultUserImage);
@@ -18,7 +18,7 @@ public static class Seeder
         {
             UserId = 1,
             Username = "Nam Pham",
-            ProfileFileId = defaultUserImage.Id
+            ProfileFileId = defaultUserImage.FileId
         });
         dbContext.SaveChanges();
     }

@@ -1,14 +1,22 @@
 using FormSubmissionDemo.Data;
+using FormSubmissionDemo.Data.Repositories;
+using FormSubmissionDemo.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<AppDbContext>(options => {
     options.UseInMemoryDatabase("AppDb");
 });
 
+builder.Services.AddScoped<IAppFileService, AppFileService>();
+builder.Services.AddScoped<ITempFileService, TempFileService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 var app = builder.Build();
 app.SeedData();
 

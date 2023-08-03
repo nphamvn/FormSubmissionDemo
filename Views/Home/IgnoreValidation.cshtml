@@ -1,0 +1,31 @@
+@model IgnoreValidation
+<form method="post">
+    <div>
+        <input type="text" asp-for="Field1" placeholder="Field1" class="ignore">
+        <span asp-validation-for="Field1" class="text-danger"></span>
+    </div>
+    <div>
+        <input type="text" asp-for="Field2" placeholder="Field2">
+        <span asp-validation-for="Field2" class="text-danger"></span>
+    </div>
+    <input type="submit" name="Confirm" value="Confirm">
+    <button type="submit">Save</button>
+</form>
+<script>
+    $(function () {
+        let name;
+        $(':submit').on('click', function () {
+            name = $(this).attr('name');
+            if (name === 'Confirm') {
+                $('.ignore').prop('disabled', true)
+            }
+            return true;
+        })
+        $('form').on('submit', function() {
+            if(!$(this).valid() && name === 'Confirm') {
+                //$('.ignore').prop('disabled', false)
+            }
+            click = '';
+        })
+    })
+</script>

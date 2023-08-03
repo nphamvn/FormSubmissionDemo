@@ -1,0 +1,73 @@
+@model FormSubmissionDemo.Models.Orders.OrderSaveViewModel
+@{
+    ViewData["OptionPlanIdSelectListItems"] = Model.OptionPlanIdSelectListItems;
+}
+<environment include="Development">
+    <div>
+        @Json.Serialize(new {
+            Model.TaskNo,
+            Model.PublishRequestDate,
+            Model.FistcalYear,
+            Model.BasicPlanId,
+            Model.Options
+        })
+    </div>
+</environment>
+<form method="post" form-mode="@Model.FormMode">
+    <div>
+        <label asp-for="TaskNo"></label>
+        <input type="text" asp-for="TaskNo" class="form-control">
+        <span asp-validation-for="TaskNo" class="text-danger"></span>
+    </div>
+    <div class="mt-2">
+        <label asp-for="PublishRequestDate"></label>
+        <input type="date" asp-for="PublishRequestDate" class="form-control">
+        <span asp-validation-for="PublishRequestDate" class="text-danger"></span>
+    </div>
+    <div class="mt-2">
+        <label asp-for="FistcalYear"></label>
+        <select asp-for="FistcalYear" asp-items="Model.FistcalYearSelectListItems" class="form-control"></select>
+        <span asp-validation-for="FistcalYear" class="text-danger"></span>
+    </div>
+    <div class="mt-2">
+        <label asp-for="BasicPlanId"></label>
+        <select asp-for="BasicPlanId" asp-items="Model.BasicPlanIdSelectListItems" class="form-control"></select>
+        <span asp-validation-for="BasicPlanId" class="text-danger"></span>
+    </div>
+    <div class="mt-2">
+        <div class="h6">Options</div>
+        <div>
+            @for (int i = 0; i < Model.Options.Count; i++)
+            {
+                @* <partial name="/Views/Orders/SaveOrderOptionPartial.cshtml" model="Model.Options[i]"></partial> *@
+                <div>
+                    <div class="d-flex">
+                        <div>Option No.</div>
+                        <button type="button" class="btn btn-secondary ms-auto">Delete</button>
+                    </div>
+                    <div>
+                        <label asp-for="Options[i].TaskNo"></label>
+                        <input type="text" asp- asp-for="Options[i].TaskNo" name="" class="form-control">
+                        <span asp-validation-for="Options[i].TaskNo" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Options[i].PlanId"></label>
+                        <select asp-for="Options[i].PlanId" asp-items="Model.OptionPlanIdSelectListItems" class="form-control"></select>
+                        <span asp-validation-for="Options[i].PlanId" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+        </div>
+        <button type="button" class="btn btn-secondary js-add-option">Add</button>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+</form>
+<script>
+    $('select[name="@Html.NameFor(m => m.FistcalYear)"]').on('change', function () {
+    })
+    $('select[name="@Html.NameFor(m => m.BasicPlanId)"]').on('change', function () {
+    })
+    $('.js-add-option').on('click', function () {
+
+    })
+</script>

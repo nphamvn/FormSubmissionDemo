@@ -1,0 +1,20 @@
+@model FormSubmissionDemo.Models.Orders.OptionSaveModel
+@{
+    var planSelectListItems = (IEnumerable<SelectListItem>)ViewData["OptionPlanIdSelectListItems"];
+}
+<div>
+    <div class="d-flex">
+        <div>Option No.</div>
+        <button type="button" class="btn btn-secondary ms-auto">Delete</button>
+    </div>
+    <div>
+        <label asp-for="TaskNo"></label>
+        <input type="text" asp- asp-for="TaskNo" name="" class="form-control">
+        <span asp-validation-for="TaskNo" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="PlanId"></label>
+        <select asp-for="PlanId" asp-items="planSelectListItems" class="form-control"></select>
+        <span asp-validation-for="PlanId" class="text-danger"></span>
+    </div>
+</div>
