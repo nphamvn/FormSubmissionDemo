@@ -1,0 +1,60 @@
+@using FormSubmission.Controllers
+@model SaveModel
+
+@using (Html.BeginForm())
+{
+    <div class="">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control"/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mt-4 blockContainer">
+        <label asp-for="Blocks" class="form-label"></label>
+        @for (var i = 0; i < Model.Blocks.Count; i++)
+        {
+            ViewData["blockIndex"] = i;
+            <partial name="_Block.cshtml" model="Model.Blocks[i]"/>
+        }
+    </div>
+    <button id="btnAddBlock" type="button" class="btn btn-sm btn-primary mt-2">Add Block</button>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+}
+<script>
+    function handleAddBlockClick() {
+        const blockContainer = $(".blockContainer");
+        const blocks = blockContainer.find(".block");
+        const blockIndex = blocks.length;
+        
+        $.ajax({
+            url: '@Url.Action(nameof(HomeController.Block))',
+            method: 'GET',
+            data: { blockIndex }
+        }).done(function (block) {
+            blockContainer.append(block);
+        });
+    }
+    
+    function handleAddFieldClick() {
+        const block = $(this).closest(".block");
+        const blockIndex = block.data("blockindex");
+        const fieldContainer = block.find(".fieldContainer");
+        const fields = block.find(".field");
+        const fieldIndex = fields.length;
+        
+        $.ajax({
+            url: '@Url.Action(nameof(HomeController.Field))',
+            method: 'GET',
+            data: { blockIndex, fieldIndex }
+        }).done(function (field) {
+            fieldContainer.append(field);
+        });
+    }
+    
+    $(function () {
+        $("#btnAddBlock").click(handleAddBlockClick);
+        $("body").on("click", "button[name='btnAddField']", handleAddFieldClick);
+    });
+
+</script>

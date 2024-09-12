@@ -1,0 +1,58 @@
+@using Type = FormSubmission.Models.Type
+@model Field
+@{
+    var i = (int)ViewData["blockIndex"]!;
+    var j = (int)ViewData["fieldIndex"]!;
+}
+
+@functions
+{
+    private (bool isValid, string errorMessage) GetFieldState(string key)
+    {
+        var isValid = true;
+        var errorMessage = string.Empty;
+        if (ViewContext.ModelState.ContainsKey(key))
+        {
+            isValid = ViewContext.ModelState[key]!.Errors.Count == 0;
+            if (!isValid)
+            {
+                errorMessage = ViewContext.ModelState[key]!.Errors[0].ErrorMessage;
+            }
+        }
+        
+        return (isValid, errorMessage);
+    }
+}
+<div class="card p-2 field @(j > 0 ? "mt-1" : string.Empty)" data-fieldindex="@j">
+    <div>
+        <label class="form-label" for="@($"Blocks_{i}__Fields_{j}__Type")">Type</label>
+        <div>
+            <div class="form-check">
+                <input type="radio" value="1" class="form-check-input" data-val="true" data-val-required="The Type field is required." id="@($"Blocks_{i}__Fields_{j}__Type_1")" name="@($"Blocks[{i}].Fields[{j}].Type")" checked="@(Model.Type == Type.Image)">
+                <label class="form-check-label" for="@($"Blocks_{i}__Fields_{j}__Type_1")">
+                    Image
+                </label>
+            </div>
+            <div class="form-check">
+                <input type="radio" value="2" class="form-check-input" id="@($"Blocks_{i}__Fields_{j}__Type_2")" name="@($"Blocks[{i}].Fields[{j}].Type")" checked="@(Model.Type == Type.Video)">
+                <label class="form-check-label" for="@($"Blocks_{i}__Fields_{j}__Type_2")">
+                    Video
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        @{
+            var key = $"Blocks[{i}].Fields[{j}].Name";
+            var (nameValid, nameErrorMessage) = GetFieldState(key);
+        }
+        <label class="form-label" for="@($"Blocks_{i}__Fields_{j}__Name")">Name</label>
+        <input class="form-control" type="text" data-val="true" data-val-required="The Name field is required." id="@($"Blocks_{i}__Fields_{j}__Name")" name="@($"Blocks[{i}].Fields[{j}].Name")" value="@Model.Name">
+        <span class="text-danger @(nameValid ? "field-validation-valid" : "field-validation-error")" data-valmsg-for="@($"Blocks[{i}].Fields[{j}].Name")" data-valmsg-replace="true">@nameErrorMessage</span>
+    </div>
+    <div class="">
+        <label class="form-label" for="@($"Blocks_{i}__Fields_{j}__Image")">Image</label>
+        <input type="file" class="form-control" id="@($"Blocks_{i}__Fields_{j}__Image")" name="@($"Blocks[{i}].Fields[{j}].Image")">
+        <span class="text-danger field-validation-valid" data-valmsg-for="@($"Blocks[{i}].Fields[{j}].Image")" data-valmsg-replace="true"></span>
+    </div>
+</div>

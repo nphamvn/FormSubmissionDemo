@@ -1,0 +1,48 @@
+@model Block
+@{
+    var i = (int)ViewData["blockIndex"]!;
+}
+
+@functions
+{
+    private (bool isValid, string errorMessage) GetFieldState(string key)
+    {
+        var isValid = true;
+        var errorMessage = string.Empty;
+        if (ViewContext.ModelState.ContainsKey(key))
+        {
+            isValid = ViewContext.ModelState[key]!.Errors.Count == 0;
+            if (!isValid)
+            {
+                errorMessage = ViewContext.ModelState[key]!.Errors[0].ErrorMessage;
+            }
+        }
+
+        return (isValid, errorMessage);
+    }
+}
+
+<div class="card p-2 block @(i > 0 ? "mt-2": string.Empty)" data-blockindex="@i">
+    <div class="">
+        <div>
+            <label class="form-label" for="@($"Blocks_{i}__Name")">Name</label>
+            <input class="form-control" type="text" data-val="true" data-val-required="The Name field is required." id="@($"Blocks_{i}__Name")" name="@($"Blocks[{i}].Name")" value="@Model.Name">
+            @{
+                var key = $"Blocks[{i}].Name";
+                var (nameValid, nameErrorMessage) = GetFieldState(key);
+            }
+            <span class="text-danger @(nameValid ? "field-validation-valid" : "field-validation-error")" data-valmsg-for="@($"Blocks[{i}].Name")" data-valmsg-replace="true">@nameErrorMessage</span>
+        </div>
+        <div class="ps-2 mt-2">
+            <label class="form-label" for="@($"Blocks_{i}__Fields")">Fields</label>
+            <div class="fieldContainer">
+                @for (var j = 0; j < Model.Fields.Count; j++)
+                {
+                    ViewData["fieldIndex"] = j;
+                    <partial name="_Field.cshtml" model="Model.Fields[j]"/>
+                }
+            </div>
+            <button type="button" name="btnAddField" class="btn btn-sm btn-primary mt-1">Add Field</button>
+        </div>
+    </div>
+</div>
