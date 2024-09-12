@@ -1,12 +1,22 @@
 @using FormSubmission.Controllers
 @model SaveModel
-
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/@@editorjs/header@latest"></script><!-- Header -->
+    <script src="https://cdn.jsdelivr.net/npm/@@editorjs/list@latest"></script><!-- List -->
+    <script src="https://cdn.jsdelivr.net/npm/@@editorjs/editorjs@latest"></script>
+}
 @using (Html.BeginForm())
 {
     <div class="">
         <label asp-for="Name" class="form-label"></label>
         <input asp-for="Name" class="form-control"/>
         <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Content" class="form-label"></label>
+        <div id="editorjs"></div>
+        <input type="hidden" asp-for="Content" id="content"/>
     </div>
     <div class="mt-4 blockContainer">
         <label asp-for="Blocks" class="form-label"></label>
@@ -33,6 +43,7 @@
             data: { blockIndex }
         }).done(function (block) {
             blockContainer.append(block);
+            setupEditor(blockIndex);
         });
     }
     
@@ -57,4 +68,41 @@
         $("body").on("click", "button[name='btnAddField']", handleAddFieldClick);
     });
 
+</script>
+
+<script>
+    const editor = new EditorJS({
+        holder: 'editorjs',
+        tools: {
+            header: {
+                class: Header,
+                inlineToolbar: false
+            },
+            list: {
+                class: List,
+                inlineToolbar: true,
+            }
+        },
+    });
+    function setupEditor(blockIndex) {
+        const id = `editorjs_Blocks_${blockIndex}__Content`;
+        const editor = new EditorJS({
+            holder: id,
+            tools: {
+                header: {
+                    class: Header,
+                    inlineToolbar: false
+                },
+                list: {
+                    class: List,
+                    inlineToolbar: true,
+                }
+            },
+        });
+    }
+    
+    @for (var i = 0; i < Model.Blocks.Count; i++)
+    {
+        @:setupEditor(@i);
+    }
 </script>

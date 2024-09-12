@@ -33,6 +33,11 @@
             }
             <span class="text-danger @(nameValid ? "field-validation-valid" : "field-validation-error")" data-valmsg-for="@($"Blocks[{i}].Name")" data-valmsg-replace="true">@nameErrorMessage</span>
         </div>
+        <div>
+            <label for="@($"Blocks_{i}__Content")" class="form-label">Content</label>
+            <div id="@($"editorjs_Blocks_{i}__Content")"></div>
+            <input type="hidden" id="@($"Blocks_{i}__Content")" name="@($"Blocks[{i}].Content")"/>
+        </div>
         <div class="ps-2 mt-2">
             <label class="form-label" for="@($"Blocks_{i}__Fields")">Fields</label>
             <div class="fieldContainer">

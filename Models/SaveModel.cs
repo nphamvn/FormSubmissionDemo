@@ -6,6 +6,9 @@ public class SaveModel
 {
     [Required]
     public string Name { get; set; }
+    
+    [Required]
+    public string Content { get; set; }
 
     public List<Block> Blocks { get; set; } = [];
 }
@@ -14,6 +17,9 @@ public class Block
 {
     [Required]
     public string Name { get; set; }
+    
+    [Required]
+    public string Content { get; set; }
 
     public List<Field> Fields { get; set; } = [];
 }
